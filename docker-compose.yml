@@ -1,0 +1,31 @@
+services:
+  database: 
+    image: postgres
+    container_name: database-letmesafe
+    restart: always
+    ports: 
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=letmesafe
+      - POSTGRES_PASSWORD=naomeroube
+      - POSTGRES_DB=safeDB
+    volumes:
+      - pgdata:/data/postgres
+  
+  app:
+    build: 
+      dockerfile: Dockerfile
+      context: .
+    container_name: letmesafe_Api
+    ports:
+      - 3000:3000
+    volumes:
+    - .:/usr/src/app
+    links:
+      - database
+    depends_on:
+      - database
+
+volumes:
+  pgdata:
+    driver: local
