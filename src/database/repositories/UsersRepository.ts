@@ -15,10 +15,25 @@ export default class UsersRepository {
     return this.repository.save(newUser)
   }
 
-  async findUser(email: string): Promise<Users | undefined> {
+  async findUserById(id: string): Promise<Users | undefined> {
+    const user = await this.repository.findOneBy({
+      id
+    })
+    return user
+  }
+
+  async findUserByEmail(email: string): Promise<Users | undefined> {
     const user = await this.repository.findOneBy({
       email
     })
     return user
+  }
+
+  async updateUser({ id, ...user }: Users): Promise<Users> {
+    const updateUser = await this.repository.createQueryBuilder().update(user).where({
+      id
+    }).returning('*').execute()
+
+    return updateUser.raw[0]
   }
 }

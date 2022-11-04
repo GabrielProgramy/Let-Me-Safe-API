@@ -1,10 +1,13 @@
 import { Router } from 'express'
 import UsersController from '../controller/UsersController'
+import { verifyJWT } from '../middleware/verifyJWT'
 
 const usersRoutes = Router()
 const controller = new UsersController()
 
-usersRoutes.post('/users', controller.createUser)
-usersRoutes.get('/users', controller.findUser)
+usersRoutes.post('/auth', controller.authenticateUser)
+usersRoutes.post('/', controller.createUser)
+usersRoutes.put('/me', verifyJWT, controller.updateUser)
+usersRoutes.get('/:userId', verifyJWT, controller.findUser)
 
 export default usersRoutes
