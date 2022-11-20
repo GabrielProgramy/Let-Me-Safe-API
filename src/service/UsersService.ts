@@ -10,9 +10,10 @@ export default class UsersService {
   }
 
   async create(user: Users): Promise<Users> {
-    const alreadyExistsUser = await this.findUserByEmail(user.email)
+    const alreadyExistsUser = await this.usersRepository.findUserByEmail(user.email)
 
     if (alreadyExistsUser) throw new Error('User already exists!')
+    if (user.password !== user.confirmPassword) throw new Error('Password not equals')
 
     return this.usersRepository.insertUsers(user)
   }

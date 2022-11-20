@@ -19,8 +19,10 @@ export class Users {
   @Column()
   password: string
 
+  confirmPassword: string
+
   @Column()
-  phone: string
+  phone?: string
 
   @Column({ nullable: true })
   avatar?: string

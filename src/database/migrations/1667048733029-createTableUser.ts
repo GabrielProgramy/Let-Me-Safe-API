@@ -31,7 +31,8 @@ export class createTableUser1667048733029 implements MigrationInterface {
           },
           {
             name: 'phone',
-            type: 'varchar'
+            type: 'varchar',
+            isNullable: true
           },
           {
             name: 'avatar',

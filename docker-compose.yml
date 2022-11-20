@@ -12,19 +12,19 @@ services:
     volumes:
       - pgdata:/data/postgres
   
-  app:
-    build: 
-      dockerfile: Dockerfile
-      context: .
-    container_name: letmesafe_Api
-    ports:
-      - 3000:3000
-    volumes:
-    - .:/usr/src/app
-    links:
-      - database
-    depends_on:
-      - database
+  # app:
+  #   build: 
+  #     dockerfile: Dockerfile
+  #     context: .
+  #   container_name: letmesafe_Api
+  #   ports:
+  #     - 3000:3000
+  #   volumes:
+  #   - .:/usr/src/app
+  #   links:
+  #     - database
+  #   depends_on:
+  #     - database
 
 volumes:
   pgdata:
