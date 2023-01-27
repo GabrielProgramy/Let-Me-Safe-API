@@ -1,45 +1,45 @@
 import { Column, Entity, OneToOne, PrimaryColumn } from 'typeorm'
-import { v4 as uuid } from 'uuid'
+import { randomUUID } from 'node:crypto'
 import Address from './Address'
 // import { Ocurrences } from './Ocurrences'
 
 @Entity('users')
 export class Users {
-  @PrimaryColumn()
-  id?: string
+	@PrimaryColumn()
+	id?: string
 
-  @Column()
-  firstName: string
+	@Column()
+	firstName: string
 
-  @Column()
-  lastName: string
+	@Column()
+	lastName: string
 
-  @Column()
-  email: string
+	@Column()
+	email: string
 
-  @Column()
-  password: string
+	@Column()
+	password: string
 
-  confirmPassword: string
+	confirmPassword: string
 
-  @Column()
-  phone?: string
+	@Column()
+	phone?: string
 
-  @Column({ nullable: true })
-  avatar?: string
+	@Column({ nullable: true })
+	avatar?: string
 
-  @Column({ nullable: true })
-  address_id?: string
+	@Column({ nullable: true })
+	address_id?: string
 
-  @OneToOne(() => Address)
-  address?: Address
+	@OneToOne(() => Address)
+	address?: Address
 
-  // @OneToMany(() => Ocurrences, (ocurrence) => ocurrence.user)
-  // ocurrences?: Ocurrences[]
+	// @OneToMany(() => Ocurrences, (ocurrence) => ocurrence.user)
+	// ocurrences?: Ocurrences[]
 
-  constructor() {
-    if (!this.id) {
-      this.id = uuid()
-    }
-  }
+	constructor() {
+		if (!this.id) {
+			this.id = randomUUID()
+		}
+	}
 }
