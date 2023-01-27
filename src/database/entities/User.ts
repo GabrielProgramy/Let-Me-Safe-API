@@ -1,7 +1,7 @@
-import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryColumn } from 'typeorm'
+import { Column, Entity, OneToOne, PrimaryColumn } from 'typeorm'
 import { v4 as uuid } from 'uuid'
 import Address from './Address'
-import { Ocurrences } from './Ocurrences'
+// import { Ocurrences } from './Ocurrences'
 
 @Entity('users')
 export class Users {
@@ -32,11 +32,10 @@ export class Users {
   address_id?: string
 
   @OneToOne(() => Address)
-  @JoinColumn()
-  address: Address
+  address?: Address
 
-  @OneToMany(() => Ocurrences, (ocurrence) => ocurrence.user)
-  ocurrences: Ocurrences[]
+  // @OneToMany(() => Ocurrences, (ocurrence) => ocurrence.user)
+  // ocurrences?: Ocurrences[]
 
   constructor() {
     if (!this.id) {

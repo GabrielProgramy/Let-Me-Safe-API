@@ -1,12 +1,16 @@
 import { Algorithm, Secret, sign } from 'jsonwebtoken'
 import { Users } from '../database/entities/User'
 import UsersRepository from '../database/repositories/UsersRepository'
+import AddressService from './AddressService'
+import { viaCepAPI } from '../utils/viaCepAPI'
 
 export default class UsersService {
   private usersRepository: UsersRepository
+  private addressService: AddressService
 
   constructor() {
     this.usersRepository = new UsersRepository()
+    this.addressService = new AddressService()
   }
 
   async create(user: Users): Promise<Users> {
@@ -34,8 +38,32 @@ export default class UsersService {
     return user
   }
 
-  async updateUser(user: Users): Promise<Users> {
+  async updateUser(user: Users, address: string): Promise<Users> {
     await this.findUser(user.id)
+
+    if (address) {
+      const existsAddress = await this.addressService.findByCep(address)
+      let addressId: string
+
+      if (!existsAddress) {
+        const { cep, bairro, localidade, logradouro, complemento, uf } = await viaCepAPI(address)
+
+        const newAddress = await this.addressService.create({
+          cep: cep.split('-').join(''),
+          district: bairro,
+          city: localidade,
+          street: logradouro,
+          state: uf,
+          complement: complemento
+        })
+
+        addressId = newAddress.id
+      }
+
+      addressId = addressId ?? existsAddress.id
+
+      user.address_id = addressId
+    }
 
     return await this.usersRepository.updateUser(user)
   }
@@ -50,7 +78,7 @@ export default class UsersService {
       iss: process.env.JWT_ISSUER,
       aud: process.env.JWT_AUDIENCE,
       email: user.email,
-      name: user.firstName
+      name: `${user.firstName} ${user.lastName}`
     }, process.env.JWT_SECRET as Secret, {
       algorithm: process.env.JWT_ALGORITHM as Algorithm,
       expiresIn: process.env.JWT_EXPIRATION

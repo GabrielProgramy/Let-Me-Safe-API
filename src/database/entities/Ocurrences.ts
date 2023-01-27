@@ -1,6 +1,6 @@
-import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm'
+import { Column, Entity, PrimaryColumn } from 'typeorm'
 import { v4 as uuid } from 'uuid'
-import { Users } from './User'
+// import { Users } from './User'
 
 @Entity()
 export class Ocurrences {
@@ -11,7 +11,7 @@ export class Ocurrences {
   type: string
 
   @Column()
-  date: Date
+  date?: Date
 
   @Column({ nullable: true })
   status: string
@@ -22,12 +22,18 @@ export class Ocurrences {
   @Column({ nullable: true })
   user_id?: string
 
-  @ManyToOne(() => Users, (user) => user.ocurrences)
-  user: Users
+  @Column('jsonb', { nullable: true })
+  location?: string
+
+  // @ManyToOne(() => Users)
+  // user?: Users
 
   constructor() {
     if (!this.id) {
       this.id = uuid()
+    }
+    if (!this.date) {
+      this.date = new Date()
     }
   }
 }

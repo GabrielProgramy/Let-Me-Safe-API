@@ -18,7 +18,7 @@ export default class UsersController {
 
       return res.status(201).json(newUser)
     } catch (error) {
-      console.error(error)
+      console.error(error.message)
       return res.status(400).json({ message: error.message })
     }
   }
@@ -38,12 +38,13 @@ export default class UsersController {
   async updateUser(req: RequestAlter, res: Response): Promise<Response> {
     try {
       const userId = req.user.sub
-      const user = req.body
+      const { cep, ...user } = req.body
 
-      const updateUser = await UsersController.usersService.updateUser({ ...user, id: userId })
+      const updateUser = await UsersController.usersService.updateUser({ ...user, id: userId }, cep)
 
       return res.status(200).json(updateUser)
     } catch (error) {
+      console.log(error)
       return res.status(404).json({ message: error.message })
     }
   }
