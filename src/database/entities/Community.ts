@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryColumn } from 'typeorm'
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryColumn } from 'typeorm'
 import { Users } from './User'
 import { randomUUID } from 'node:crypto'
 
@@ -14,7 +14,9 @@ export default class Community {
 	description: string
 
 	@Column({ nullable: true })
-	members?: Array<string>
+	members?: string
+
+	membersArray?: string[]
 
 	@Column()
 	privacy: boolean
@@ -22,10 +24,12 @@ export default class Community {
 	@Column()
 	owner: string
 
-	@Column(() => Users)
+	@ManyToOne(() => Users, user => user.id)
+	@JoinColumn({ name: 'owner' })
 	user?: Users
 
 	constructor() {
 		if (!this.id) this.id = randomUUID()
+		if (this.members) this.membersArray = Array.from(this.members)
 	}
 }

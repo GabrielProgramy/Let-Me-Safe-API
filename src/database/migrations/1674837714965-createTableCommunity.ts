@@ -26,7 +26,7 @@ export class createTableCommunity1674837714965 implements MigrationInterface {
 				},
 				{
 					name: 'members',
-					type: 'uuid[]',
+					type: 'uuid array',
 					isNullable: true
 				},
 				{

@@ -15,12 +15,17 @@ export class CommunityRepository {
 		return this.repository.save(newCommunity)
 	}
 
-	async findCommunityById(id: string): Promise<Community | undefined> {
-		return this.repository.findOneBy({ id })
+	async findCommunityByArguments(options: object): Promise<Community | undefined> {
+		return this.repository.findOneBy(options)
 	}
 
-	async getCommunities(): Promise<Community[]> {
-		return this.repository.find()
+	async getCommunities(owner?: string): Promise<Community[]> {
+		return this.repository.find({
+			where: { owner },
+			relations: {
+				// user: true
+			}
+		})
 	}
 
 	async updateCommunity({ id, ...community }: Community): Promise<Community> {
