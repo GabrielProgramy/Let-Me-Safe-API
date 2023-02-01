@@ -15,8 +15,10 @@ export class CommunityRepository {
 		return this.repository.save(newCommunity)
 	}
 
-	async findCommunityByArguments(options: object): Promise<Community | undefined> {
-		return this.repository.findOneBy(options)
+	async findCommunityByArguments(options: object): Promise<Community[] | undefined> {
+		return this.repository.find({
+			where: options
+		})
 	}
 
 	async getCommunities(owner?: string): Promise<Community[]> {
@@ -29,12 +31,9 @@ export class CommunityRepository {
 	}
 
 	async updateCommunity({ id, ...community }: Community): Promise<Community> {
-		const updatedCommunity = await this.repository
-			.createQueryBuilder().update(community).where({
-				id
-			}).returning('*').execute()
+		const updatedCommunity = await this.repository.save({ id, ...community })
 
-		return updatedCommunity.raw[0]
+		return updatedCommunity
 	}
 
 	async deleteCommunity(communityId: string): Promise<void> {

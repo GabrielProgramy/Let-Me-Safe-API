@@ -22,10 +22,8 @@ export default class UsersRepository {
 		return user
 	}
 
-	async findUserByEmail(email: string): Promise<Users | undefined> {
-		const user = await this.repository.findOneBy({
-			email
-		})
+	async findUserByOptions(options: Object): Promise<Users | undefined> {
+		const user = await this.repository.findOneBy(options)
 		return user
 	}
 

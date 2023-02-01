@@ -8,21 +8,19 @@ export default class Community {
 	id?: string
 
 	@Column()
-	name: string
+	name?: string
 
 	@Column()
-	description: string
+	description?: string
 
 	@Column({ nullable: true })
 	members?: string
 
-	membersArray?: string[]
+	@Column()
+	privacy?: boolean
 
 	@Column()
-	privacy: boolean
-
-	@Column()
-	owner: string
+	owner?: string
 
 	@ManyToOne(() => Users, user => user.id)
 	@JoinColumn({ name: 'owner' })
@@ -30,6 +28,5 @@ export default class Community {
 
 	constructor() {
 		if (!this.id) this.id = randomUUID()
-		if (this.members) this.membersArray = Array.from(this.members)
 	}
 }
