@@ -41,6 +41,13 @@ export default class ContactsRepository {
     return updateContact.raw[0];
   }
 
+  async listContacts(id: string): Promise<Contacts[]> {
+    const contacts = await this.repository.find({
+      where: { id },
+    });
+    return contacts;
+  }
+
   async deleteContact(id: string): Promise<void> {
     await this.repository.delete(id);
   }
