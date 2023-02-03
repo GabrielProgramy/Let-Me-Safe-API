@@ -14,6 +14,13 @@ export default class ContactsRepository {
     return this.repository.save(newContact);
   }
 
+  async findContactByName(name: string): Promise<Contacts | undefined> {
+    const contact = await this.repository.findOneBy({
+      name,
+    });
+    return contact;
+  }
+
   async findContactById(id: string): Promise<Contacts | undefined> {
     const contact = await this.repository.findOneBy({
       id,
