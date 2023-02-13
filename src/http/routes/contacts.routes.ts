@@ -1,13 +1,14 @@
-// import { Router } from "express";
-// import ContactsController from "../controller/UsersController";
-// import { verifyJWT } from "../middleware/verifyJWT";
+import { Router } from "express";
+import ContactsController from "../controller/ContactsController";
+import { verifyJWT } from "../middleware/verifyJWT";
 
-// const contactsRoutes = Router();
-// const controller = new ContactsController();
+const contactsRoutes = Router();
+const controller = new ContactsController();
 
-// usersRoutes.post("/auth", controller.authenticateContacts);
-// usersRoutes.post("/", controller.createContacts);
-// contactsRoutes.put("/me", verifyJWT, controller.updateUser);
-// usersRoutes.get("/:userId", verifyJWT, controller.findUser);
+contactsRoutes.post("/", verifyJWT, controller.createContact);
+contactsRoutes.get("/:contactId", verifyJWT, controller.findContactById);
+contactsRoutes.put("/me", verifyJWT, controller.updateContact);
+contactsRoutes.get("/", verifyJWT, controller.listContacts);
+contactsRoutes.delete("/:contactId", verifyJWT, controller.deleteContact);
 
-// export default usersRoutes;
+export default contactsRoutes;
