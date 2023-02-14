@@ -21,7 +21,7 @@ export default class Contacts {
 
   @ManyToOne(() => Users)
   @JoinColumn()
-  user: Users;
+  user?: Users;
 
   constructor() {
     if (!this.id) {

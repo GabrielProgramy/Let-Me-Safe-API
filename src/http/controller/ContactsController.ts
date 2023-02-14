@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import ContactsService from "../../service/ContactsService";
+import { RequestAlter } from "../middleware/verifyJWT";
 
 export default class ContactsController {
   private static contactsService: ContactsService;
@@ -8,12 +9,19 @@ export default class ContactsController {
     ContactsController.contactsService = new ContactsService();
   }
 
-  async createContact(req: Request, res: Response): Promise<Response> {
+  async createContact(req: RequestAlter, res: Response): Promise<Response> {
     try {
-      const contact = req.body;
+      const { name, email, phone } = req.body;
+
+      const userId = req.user.sub as string;
 
       const newContact = await ContactsController.contactsService.createContact(
-        contact
+        {
+          name,
+          email,
+          phone,
+          userId,
+        }
       );
 
       return res.status(201).json(newContact);
