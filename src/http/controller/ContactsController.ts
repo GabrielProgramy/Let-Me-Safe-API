@@ -49,8 +49,13 @@ export default class ContactsController {
     try {
       const contact = req.body;
 
+      const contactId = req.params.contactId;
+
       const updateContact =
-        await ContactsController.contactsService.updateContact(contact);
+        await ContactsController.contactsService.updateContact({
+          ...contact,
+          id: contactId,
+        });
 
       return res.status(200).json(updateContact);
     } catch (error) {
