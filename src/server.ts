@@ -5,6 +5,7 @@ import { postgresConnection } from './database/connection'
 import usersRoutes from './http/routes/users.routes'
 import ocurrenceRoute from './http/routes/ocurrences.routes'
 import communityRouter from './http/routes/community.routes'
+import contactsRoutes from './http/routes/contacts.routes'
 
 postgresConnection.initialize().then(() => {
 	const app = express()
@@ -12,7 +13,8 @@ postgresConnection.initialize().then(() => {
 	app.use(helmet())
 	app.use(express.json())
 
-	app.use('/users', usersRoutes)
+	app.use('/users', usersRoutes);
+	app.use('/contacts', contactsRoutes)
 	app.use('/ocurrences', ocurrenceRoute)
 	app.use('/community', communityRouter)
 
