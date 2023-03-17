@@ -6,6 +6,7 @@ const usersRoutes = Router();
 const controller = new UsersController();
 
 usersRoutes.post("/auth", controller.authenticateUser);
+usersRoutes.post("/auth/google", controller.authenticateGoogle);
 usersRoutes.post("/", controller.createUser);
 usersRoutes.put("/me", verifyJWT, controller.updateUser);
 usersRoutes.get("/:userId", verifyJWT, controller.findUser);

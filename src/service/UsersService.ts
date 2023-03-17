@@ -1,4 +1,5 @@
 import { Algorithm, Secret, sign } from 'jsonwebtoken'
+import moment from 'moment'
 import { Users } from '../database/entities/User'
 import UsersRepository from '../database/repositories/UsersRepository'
 import AddressService from './AddressService'
@@ -13,13 +14,29 @@ export default class UsersService {
 		this.addressService = new AddressService()
 	}
 
+	private generateToken(user: {
+		id: string, email: string, firstName: string, lastName: string
+	}) {
+		return sign({
+			sub: user.id,
+			iss: process.env.JWT_ISSUER,
+			aud: process.env.JWT_AUDIENCE,
+			email: user.email,
+			name: `${user.firstName} ${user.lastName}`
+		}, process.env.JWT_SECRET as Secret, {
+			algorithm: process.env.JWT_ALGORITHM as Algorithm,
+			expiresIn: process.env.JWT_EXPIRATION
+		})
+	}
+
 	async create(user: Users): Promise<Users> {
 		const alreadyExistsUser = await this.usersRepository.findUserByOptions({
 			email: user.email
 		})
+		const years = Number(moment(user.birthDate, moment.HTML5_FMT.DATETIME_LOCAL).fromNow().match(/\d/g).join(''))
 
 		if (alreadyExistsUser) throw new Error('User already exists!')
-		if (user.password !== user.confirmPassword) throw new Error('Password not equals')
+		if (years < 18) throw new Error('User dont permission!')
 
 		return this.usersRepository.insertUsers(user)
 	}
@@ -75,17 +92,36 @@ export default class UsersService {
 
 		if (user.password !== password) throw new Error('Email or Password invalid!')
 
-		const token = sign({
-			sub: user.id,
-			iss: process.env.JWT_ISSUER,
-			aud: process.env.JWT_AUDIENCE,
-			email: user.email,
-			name: `${user.firstName} ${user.lastName}`
-		}, process.env.JWT_SECRET as Secret, {
-			algorithm: process.env.JWT_ALGORITHM as Algorithm,
-			expiresIn: process.env.JWT_EXPIRATION
+		const token = this.generateToken({
+			id: user.id,
+			email,
+			firstName: user.firstName,
+			lastName: user.lastName
 		})
 
 		return token
+	}
+
+	async authenticateGoogle(oAuthtoken: string): Promise<string> {
+		const { data } = await fetch(`https://www.googleapis.com/oauth2/v2/userinfo?oauth_token=${oAuthtoken}`)
+
+
+		console.log(data)
+		// const user = await this.findUser({ email })
+
+
+		// const token = this.generateToken({
+		// 	id: user.id,
+		// 	email,
+		// 	firstName: user.firstName,
+		// 	lastName: user.lastName
+		// })
+
+		// return token
+
+		const a: Promise<string> = new Promise((resolve, reject) => {
+			resolve('teste')
+		})
+		return a
 	}
 }
