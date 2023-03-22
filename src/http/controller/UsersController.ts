@@ -26,11 +26,13 @@ export default class UsersController {
 		}
 	}
 
-	async findUser(req: Request, res: Response): Promise<Response> {
+	async findUser(req: RequestAlter, res: Response): Promise<Response> {
 		try {
-			const id = req.params.userId
+			let id = req.params.userId
 
-			const user = await UsersController.usersService.findUser(id)
+			if (id === 'me') id = req.user.sub as string
+
+			const user = await UsersController.usersService.findUserById(id)
 
 			return res.status(200).json(user)
 		} catch (error) {
@@ -41,9 +43,11 @@ export default class UsersController {
 	async updateUser(req: RequestAlter, res: Response): Promise<Response> {
 		try {
 			const userId = req.user.sub
+			const avatar = req.file
+
 			const { cep, ...user } = await updateUserSchema.validateAsync(req.body)
 
-			const updateUser = await UsersController.usersService.updateUser({ ...user, id: userId }, cep)
+			const updateUser = await UsersController.usersService.updateUser({ ...user, id: userId }, cep, avatar)
 
 			return res.status(200).json(updateUser)
 		} catch (error) {

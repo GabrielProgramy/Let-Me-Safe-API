@@ -1,9 +1,15 @@
-import { Algorithm, Secret, sign } from 'jsonwebtoken'
+import fs from 'node:fs'
 import moment from 'moment'
+import { Algorithm, Secret, sign } from 'jsonwebtoken'
+import { ref, getDownloadURL, uploadBytes } from 'firebase/storage'
+
 import { Users } from '../database/entities/User'
 import UsersRepository from '../database/repositories/UsersRepository'
 import AddressService from './AddressService'
 import { viaCepAPI } from '../utils/viaCepAPI'
+import { storage } from '../utils/firebase'
+
+
 
 export default class UsersService {
 	private usersRepository: UsersRepository
@@ -57,8 +63,19 @@ export default class UsersService {
 		return user
 	}
 
-	async updateUser(user: Users, address: string): Promise<Users> {
-		await this.findUser(user.id)
+	async updateUser(user: Users, address: string, avatar: Express.Multer.File): Promise<Users> {
+		await this.findUserById(user.id)
+
+		if (avatar) {
+			const avatarRef = ref(storage, `${avatar.filename}`)
+			await uploadBytes(avatarRef, fs.readFileSync(avatar.path))
+			const avatarPath = await getDownloadURL(avatarRef)
+
+			if (avatarPath) fs.unlinkSync(avatar.path)
+
+			user.avatar = avatarPath
+		}
+
 
 		if (address) {
 			const existsAddress = await this.addressService.findByCep(address)
