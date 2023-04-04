@@ -12,8 +12,21 @@ export class EmailService {
 		},
 	});
 
-	// async sendMail(to: string, subject: string, body: string) {
-	//     const message = await this.transporter.sendMail({
-	//         from:
-	// }
+	async sendEmail(to: string, subject: string, text: string) {
+		const mailOptions = {
+			from: process.env.MAIL_FROM,
+			to,
+			subject,
+			text,
+		};
+
+		return await this.transporter.sendMail(mailOptions);
+	}
 }
+
+// const mailOptions = {
+// 	from: process.env.MAIL_FROM,
+// 	to: process.env.MAIL_TO,
+// 	subject: 'Sending Email using Node.js',
+// 	text: `Olá,\n\nPara redefinir sua senha, clique no seguinte link: http://localhost:3000/reset-password/${token}\n\nSe você não solicitou a redefinição da sua senha, ignore este e-mail.\n\nAtenciosamente,\nEquipe de suporte do sistema.`,
+// };
