@@ -1,6 +1,6 @@
 import { nodemailer } from 'nodemailer';
 
-export class EmailService {
+export default class EmailService {
 	private transporter = nodemailer.createTransport({
 		service: 'gmail',
 		host: process.env.MAIL_HOST,
@@ -22,6 +22,13 @@ export class EmailService {
 
 		return await this.transporter.sendMail(mailOptions);
 	}
+
+	// 	if (error) {
+	// 		console.log(error);
+	// 	} else {
+	// 		console.log('Email sent: ' + info.response);
+	// 	}
+	// }
 }
 
 // const mailOptions = {
