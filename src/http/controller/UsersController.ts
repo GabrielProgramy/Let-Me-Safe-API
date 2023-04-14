@@ -1,5 +1,4 @@
 import { Request, Response } from 'express'
-import { Users } from '../../database/entities/User'
 import UsersService from '../../service/UsersService'
 import { RequestAlter } from '../middleware/verifyJWT'
 import { authUserSchema, createUserSchema, updateUserSchema } from './validations/usersValidations'
@@ -32,7 +31,7 @@ export default class UsersController {
 
 			if (id === 'me') id = req.user.sub as string
 
-			const user = await UsersController.usersService.findUserById(id)
+			const user = await UsersController.usersService.findUser({ id })
 
 			return res.status(200).json(user)
 		} catch (error) {
@@ -71,16 +70,16 @@ export default class UsersController {
 	}
 
 
-	async authenticateGoogle(req: Request, res: Response): Promise<Response> {
-		try {
-			const oAuthtoken = req.body.token
+	// async authenticateGoogle(req: Request, res: Response): Promise<Response> {
+	// 	try {
+	// 		const oAuthtoken = req.body.token
 
-			const token = await UsersController.usersService.authenticateGoogle(oAuthtoken)
+	// 		const token = await UsersController.usersService.authenticateGoogle(oAuthtoken)
 
-			res.status(200).json({ token })
-		} catch (err) {
-			console.error(err)
-			return res.status(404).json({ message: err.message })
-		}
-	}
+	// 		res.status(200).json({ token })
+	// 	} catch (err) {
+	// 		console.error(err)
+	// 		return res.status(404).json({ message: err.message })
+	// 	}
+	// }
 }

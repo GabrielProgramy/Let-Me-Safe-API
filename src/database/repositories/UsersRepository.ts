@@ -15,14 +15,8 @@ export default class UsersRepository {
 		return this.repository.save(newUser)
 	}
 
-	async findUserById(id: string): Promise<Users | undefined> {
-		const user = await this.repository.findOneBy({
-			id
-		})
-		return user
-	}
 
-	async findUserByOptions(options: Object): Promise<Users | undefined> {
+	async findUser(options: Object): Promise<Users | undefined> {
 		const user = await this.repository.findOneBy(options)
 		return user
 	}

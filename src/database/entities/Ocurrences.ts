@@ -1,6 +1,7 @@
-import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm'
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryColumn } from 'typeorm'
 import { randomUUID } from 'node:crypto'
 import { Users } from './User'
+import Address from './Address'
 
 @Entity()
 export class Ocurrences {
@@ -20,13 +21,17 @@ export class Ocurrences {
 	description: string
 
 	@Column({ nullable: true })
-	user_id?: string
+	userId?: string
 
 	@Column('jsonb', { nullable: true })
 	location?: string
 
-	// @ManyToOne(() => Users, user => user.id)
-	user?: Users
+	@Column({ nullable: true })
+	addressId?: string
+
+	@ManyToOne(() => Address, address => address.ocurrences)
+	@JoinColumn({ referencedColumnName: 'id' })
+	address?: Address
 
 	constructor() {
 		if (!this.id) {

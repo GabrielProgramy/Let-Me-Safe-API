@@ -30,13 +30,13 @@ export class Users {
 	birthDate?: Date
 
 	@Column({ nullable: true })
-	address_id?: string
+	addressId?: string
 
-	@OneToOne(() => Address)
-	address?: Address
+	// @OneToOne(() => Address)
+	// address?: Address
 
-	@OneToMany(() => Ocurrences, (ocurrence) => ocurrence.user)
-	ocurrences?: Ocurrences[]
+	// @OneToMany(() => Ocurrences, (ocurrence) => ocurrence.user)
+	// ocurrences?: Ocurrences[]
 
 	constructor() {
 		if (!this.id) {
