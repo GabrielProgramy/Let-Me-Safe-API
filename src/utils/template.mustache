@@ -1,15 +1,88 @@
 <!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
   <title>Recuperação de senha</title>
+  <style>
+    body {
+      font-family: 'Courier New', Courier, monospace;
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      background-color: #5E5E5E;
+    }
+
+    .container {
+        background-color: #ffffff; 
+        max-width: 69.438rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        margin: 0 auto;
+        padding-top: 6.25rem;
+    }
+
+    img {
+        margin-top: 0.25rem;
+        background-color: #77C260;
+        width: 17rem;
+        border-radius: 12.5rem;
+    }
+
+    h1 {
+        color: #48763A;
+    }
+
+    p { 
+        color: #5E5E5E;
+        font-style: normal;
+        font-weight: 400;
+        font-size: 1.5rem;
+        line-height: 1.813rem;
+        width: 46.188rem;
+    }
+
+    a {
+        color: #ffffff !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        width: 20.938rem;
+        height: 3.75rem;
+        background-color: #247636;
+        border-radius: 3.75rem;
+        margin: 2.125rem 0;
+    }
+
+    strong {
+        color: #48763A;
+    }
+
+    footer > p {
+        line-height: 1.2rem;
+    }
+  </style>
 </head>
 <body>
-  <h1>Recuperação de senha</h1>
-  <p>Olá {{name}},</p>
-  <p>Você está recebendo este e-mail porque solicitou a recuperação de senha da sua conta em nosso site. Por favor, clique no link abaixo para redefinir sua senha:</p>
-  <p><a href="{{resetLink}}">{{resetLink}}</a></p>
-  <p>Se você não solicitou a recuperação de senha, por favor ignore este e-mail.</p>
-  <p>Obrigado!</p>
+    <div class="container">
+        <img src="https://raw.githubusercontent.com/marclipe/Estudos/e99639a775e0877dbf1c9392a2874a942b90e3ca/Others-Web-Projects/img/let-me-safe.svg" alt="Logo Let Me Safe">
+        <div>
+            <h1>Recuperação de senha</h1>
+            <p>Olá <strong>{{name}}</strong>, você está recebendo este e-mail porque solicitou a recuperação de senha da sua conta em nosso site. Por favor, clique no link abaixo para redefinir sua senha:</p>
+        </div>
+        <div><a href="{{resetLink}}">{{resetLink}}</a></div>
+        <div>
+            <p>Se você não solicitou a recuperação de senha, por favor ignore este e-mail.</p>
+            <p>Obrigado!</p>
+        </div>
+        <footer>
+            <p>Copyright © 2022</p>
+            <p><strong>Let Me Safe</strong></p>
+        </footer>
+    </div>
 </body>
 </html>

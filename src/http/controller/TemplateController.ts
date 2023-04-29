@@ -1,25 +1,39 @@
 import { Request, Response } from 'express';
 import { Mustache } from 'mustache';
 import fs from 'fs';
-import { nodemailer } from 'nodemailer';
-import { getRepository } from 'typeorm';
-import { User } from '../../database/entities/User';
+import nodemailer from 'nodemailer';
 
 export async function sendPasswordResetEmail(req: Request, res: Response) {
-	const userId = req.params.id;
+	const email = req.body.email;
 
-	const userRepository = getRepository(User);
-	const user = await userRepository.findOne(userId);
+	const template = fs.readFileSync('./reset-password-email.mustache', 'utf-8');
 
-	if (!user) {
-		return res.status(404).json({ message: 'Usuário não encontrado!' });
-	}
+	const resetToken = 'some-random-token';
 
-	const template = fs.readFileSync('src/utils/template.mustache', 'utf-8');
+	const resetLink = `https://example.com/reset-password?email=${email}&token=${resetToken}`;
 
 	const data = {
-		title: 'Bem-vindo a Let Me Safe!',
-		heading:
-			`Olá ${user.name}, aqui ` + 'está o seu código de recuperação de senha:',
+		name: email,
+		resetLink: resetLink,
 	};
+
+	const html = Mustache.render(template, data);
+
+	const transporter = nodemailer.createTransport({
+		host: 'smtp.example.com',
+		port: 587,
+		auth: {
+			user: 'user@example.com',
+			pass: 'password',
+		},
+	});
+
+	await transporter.sendMail({
+		from: 'site@example.com',
+		to: email,
+		subject: 'Redefinição de senha Let Me Safe',
+		html: html,
+	});
+
+	res.send('E-mail de recuperação de senha enviado com sucesso!');
 }
