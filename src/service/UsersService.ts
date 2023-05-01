@@ -8,6 +8,8 @@ import UsersRepository from '../database/repositories/UsersRepository';
 import AddressService from './AddressService';
 import { viaCepAPI } from '../utils/viaCepAPI';
 import { storage } from '../utils/firebase';
+import Mustache from 'mustache';
+import path from 'node:path';
 
 export default class UsersService {
 	private usersRepository: UsersRepository;
@@ -157,7 +159,32 @@ export default class UsersService {
 		return a;
 	}
 
-	async sendEmail(): Promise<void> {
+	async sendEmail(email: string): Promise<void> {
+		const user = await this.usersRepository.findUserByOptions({ email });
+
+		if (!user) return;
+
+		const template = fs.readFileSync(
+			path.resolve('src/utils/templates/template.mustache'),
+			'utf-8',
+		);
+
+		/*Token aqui*/
+		const resetToken = this.generateTokenPassword({
+			id: user.id,
+			firstName: user.firstName,
+			lastName: user.lastName,
+		});
+
+		const resetLink = `https://example.com/reset-password?email=ok&token=${resetToken}`;
+
+		const data = {
+			name: user.firstName,
+			resetLink: resetLink,
+		};
+
+		const html = Mustache.render(template, data);
+
 		const transporter = nodemailer.createTransport({
 			host: 'smtp.ethereal.email',
 			port: 587,
@@ -169,10 +196,10 @@ export default class UsersService {
 		});
 
 		const mailOptions = {
-			from: 'trever.bailey39@ethereal.email',
-			to: '',
-			subject: 'teste',
-			text: 'teste',
+			from: email,
+			to: 'trever.bailey39@ethereal.email',
+			subject: 'Reset de senha Let Me Safe',
+			html: html,
 		};
 
 		transporter.sendMail(mailOptions, (error, info) => {
@@ -182,6 +209,25 @@ export default class UsersService {
 				console.log('E-mail enviado com sucesso!', info.accepted);
 			}
 		});
+	}
+
+	public generateTokenPassword(user: {
+		id: string;
+		firstName: string;
+		lastName: string;
+	}): string {
+		return sign(
+			{
+				sub: user.id,
+				iss: process.env.JWT_ISSUER,
+				aud: process.env.JWT_AUDIENCE_RESET,
+			},
+			process.env.JWT_SECRET as Secret,
+			{
+				algorithm: process.env.JWT_ALGORITHM as Algorithm,
+				expiresIn: process.env.JWT_EXPIRATION_RESET,
+			},
+		);
 	}
 
 	// 	if (error) {

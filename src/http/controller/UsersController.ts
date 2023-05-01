@@ -100,9 +100,9 @@ export default class UsersController {
 
 	async sendResetToken(req: Request, res: Response): Promise<Response> {
 		try {
-			// const email = req.body.email;
+			const email = req.body.email;
 
-			await UsersController.usersService.sendEmail();
+			await UsersController.usersService.sendEmail(email);
 
 			return res.status(200).end();
 		} catch (error) {

@@ -6,7 +6,7 @@ import nodemailer from 'nodemailer';
 export async function sendPasswordResetEmail(req: Request, res: Response) {
 	const email = req.body.email;
 
-	const template = fs.readFileSync('./reset-password-email.mustache', 'utf-8');
+	const template = fs.readFileSync('./template.mustache', 'utf-8');
 
 	const resetToken = 'some-random-token';
 
@@ -20,16 +20,16 @@ export async function sendPasswordResetEmail(req: Request, res: Response) {
 	const html = Mustache.render(template, data);
 
 	const transporter = nodemailer.createTransport({
-		host: 'smtp.example.com',
+		host: 'smtp.ethereal.email',
 		port: 587,
 		auth: {
-			user: 'user@example.com',
-			pass: 'password',
+			user: 'trever.bailey39@ethereal.email',
+			pass: 'FK8sETDnX1hfswgqn5',
 		},
 	});
 
 	await transporter.sendMail({
-		from: 'site@example.com',
+		from: 'trever.bailey39@ethereal.email',
 		to: email,
 		subject: 'Redefinição de senha Let Me Safe',
 		html: html,
