@@ -109,4 +109,17 @@ export default class UsersController {
 			return res.status(404).json({ message: error.message });
 		}
 	}
+
+	async resetPassword(req: RequestAlter, res: Response): Promise<Response> {
+		try {
+			const { password } = req.body;
+			const { sub } = req.user;
+
+			await UsersController.usersService.resetPassword(password, sub);
+
+			return res.status(200).end();
+		} catch (error) {
+			return res.status(404).json({ message: error.message });
+		}
+	}
 }

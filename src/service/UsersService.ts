@@ -22,7 +22,7 @@ export default class UsersService {
 
 	private generateToken(user: {
 		id: string;
-		email: string;
+		email?: string;
 		firstName: string;
 		lastName: string;
 	}) {
@@ -77,8 +77,8 @@ export default class UsersService {
 
 	async updateUser(
 		user: Users,
-		address: string,
-		avatar: Express.Multer.File,
+		address?: string,
+		avatar?: Express.Multer.File,
 	): Promise<Users> {
 		await this.findUserById(user.id);
 
@@ -142,16 +142,6 @@ export default class UsersService {
 		);
 
 		console.log(data);
-		// const user = await this.findUser({ email })
-
-		// const token = this.generateToken({
-		// 	id: user.id,
-		// 	email,
-		// 	firstName: user.firstName,
-		// 	lastName: user.lastName
-		// })
-
-		// return token
 
 		const a: Promise<string> = new Promise((resolve, reject) => {
 			resolve('teste');
@@ -170,7 +160,7 @@ export default class UsersService {
 		);
 
 		/*Token aqui*/
-		const resetToken = this.generateTokenPassword({
+		const resetToken = this.generateToken({
 			id: user.id,
 			firstName: user.firstName,
 			lastName: user.lastName,
@@ -211,37 +201,11 @@ export default class UsersService {
 		});
 	}
 
-	public generateTokenPassword(user: {
-		id: string;
-		firstName: string;
-		lastName: string;
-	}): string {
-		return sign(
-			{
-				sub: user.id,
-				iss: process.env.JWT_ISSUER,
-				aud: process.env.JWT_AUDIENCE_RESET,
-			},
-			process.env.JWT_SECRET as Secret,
-			{
-				algorithm: process.env.JWT_ALGORITHM as Algorithm,
-				expiresIn: process.env.JWT_EXPIRATION_RESET,
-			},
-		);
+	async resetPassword(password, userId): Promise<Users> {
+		const user = await this.findUserById(userId);
+
+		user.password = password;
+
+		return await this.updateUser(user);
 	}
-
-	// 	if (error) {
-	// 		console.log(error);
-	// 	} else {
-	// 		console.log('Email sent: ' + info.response);
-	// 	}
-	// }
-	// }
-
-	// const mailOptions = {
-	// 	from: process.env.MAIL_FROM,
-	// 	to: process.env.MAIL_TO,
-	// 	subject: 'Sending Email using Node.js',
-	// 	text: `Olá,\n\nPara redefinir sua senha, clique no seguinte link: http://localhost:3000/reset-password/${token}\n\nSe você não solicitou a redefinição da sua senha, ignore este e-mail.\n\nAtenciosamente,\nEquipe de suporte do sistema.`,
-	// };
 }
