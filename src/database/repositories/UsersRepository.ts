@@ -2,6 +2,8 @@ import { Repository } from 'typeorm'
 import { postgresConnection } from '../connection'
 import { Users } from '../entities/User'
 
+interface User extends Omit<Users, 'birthDate'> {}
+
 export default class UsersRepository {
 	private repository: Repository<Users>
 
@@ -21,7 +23,7 @@ export default class UsersRepository {
 		return user
 	}
 
-	async updateUser({ id, ...user }: Users): Promise<Users> {
+	async updateUser({ id, ...user }: User): Promise<Users> {
 		const updateUser = await this.repository.createQueryBuilder().update(user).where({
 			id
 		}).returning('*').execute()

@@ -1,6 +1,7 @@
 import fs from 'node:fs'
+import fetch from 'node-fetch'
 import moment from 'moment'
-import { Algorithm, Secret, sign } from 'jsonwebtoken'
+import { Algorithm, Secret, sign, verify } from 'jsonwebtoken'
 import { ref, getDownloadURL, uploadBytes } from 'firebase/storage'
 
 import { Users } from '../database/entities/User'
@@ -8,6 +9,7 @@ import UsersRepository from '../database/repositories/UsersRepository'
 import AddressService from './AddressService'
 import { VCAPI_CEP } from '../utils/viaCepAPI'
 import { storage } from '../utils/firebase'
+import { randomBytes } from 'node:crypto'
 
 
 
@@ -21,14 +23,15 @@ export default class UsersService {
 	}
 
 	private generateToken(user: {
-		id: string, email: string, firstName: string, lastName: string
+		id: string, email: string, firstName: string, lastName: string, avatar: string
 	}) {
 		return sign({
 			sub: user.id,
 			iss: process.env.JWT_ISSUER,
 			aud: process.env.JWT_AUDIENCE,
 			email: user.email,
-			name: `${user.firstName} ${user.lastName}`
+			name: `${user.firstName} ${user.lastName}`,
+			avatar: user.avatar,
 		}, process.env.JWT_SECRET as Secret, {
 			algorithm: process.env.JWT_ALGORITHM as Algorithm,
 			expiresIn: process.env.JWT_EXPIRATION
@@ -56,7 +59,11 @@ export default class UsersService {
 	}
 
 	async updateUser(user: Users, address: string, avatar: Express.Multer.File): Promise<Users> {
-		await this.findUser({ id: user.id })
+		const existingUser = await this.findUser({ id: user.id })
+
+		let birthDate = moment(existingUser.birthDate)
+
+		if (!birthDate.isSame(moment(user.birthDate))) birthDate = moment(user.birthDate.setDate(user.birthDate.getDate() + 1))
 
 		if (avatar) {
 			const avatarRef = ref(storage, `${avatar.filename}`)
@@ -87,8 +94,15 @@ export default class UsersService {
 			user.addressId = addressId ?? existsAddress.id
 		}
 
-		return await this.usersRepository.updateUser(user)
+		return this.usersRepository.updateUser({
+			birthDate: birthDate.format('YYYY-MM-DD'),
+			...user,
+		})
+
+		return user
+
 	}
+
 
 	async authenticateUser(email: string, password: string): Promise<string> {
 		const user = await this.findUser({ email })
@@ -99,32 +113,61 @@ export default class UsersService {
 			id: user.id,
 			email,
 			firstName: user.firstName,
+			avatar: user.avatar,
 			lastName: user.lastName
 		})
 
 		return token
 	}
 
-	// async authenticateGoogle(oAuthtoken: string): Promise<string> {
-	// 	const { data } = await fetch(`https://www.googleapis.com/oauth2/v2/userinfo?oauth_token=${oAuthtoken}`)
+	async authenticateGoogle(oAuthtoken: string): Promise<string> {
+		const retur = await fetch(
+			"https://www.googleapis.com/userinfo/v2/me",
+			{
+				headers: { Authorization: `Bearer ${oAuthtoken}` },
+			}
+		);
+
+		const data = await retur.json();
+
+		let user = await this.usersRepository.findUser({ email: data.email })
+
+		if (!user) {
+			user = await this.usersRepository.insertUsers({
+				email: data.email,
+				firstName: data.given_name,
+				lastName: data.family_name,
+				password: randomBytes(16).toString('hex'),
+				avatar: data.picture,
+			})
+
+		}
 
 
-	// 	console.log(data)
-	// 	// const user = await this.findUser({ email })
+		const token = this.generateToken({
+			id: user.id,
+			email: user.email,
+			firstName: user.firstName,
+			lastName: user.lastName,
+			avatar: user.avatar,
+		})
 
+		return token
+	}
 
-	// 	// const token = this.generateToken({
-	// 	// 	id: user.id,
-	// 	// 	email,
-	// 	// 	firstName: user.firstName,
-	// 	// 	lastName: user.lastName
-	// 	// })
+	async refreshToken(token: string): Promise<string> {
+		const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
 
-	// 	// return token
+		const user = await this.findUser({ id: payload.sub })
 
-	// 	const a: Promise<string> = new Promise((resolve, reject) => {
-	// 		resolve('teste')
-	// 	})
-	// 	return a
-	// }
+		const newToken = this.generateToken({
+			id: user.id,
+			email: user.email,
+			firstName: user.firstName,
+			lastName: user.lastName,
+			avatar: user.avatar,
+		})
+
+		return newToken
+	}
 }

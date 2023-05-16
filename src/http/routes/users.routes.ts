@@ -8,7 +8,8 @@ const controller = new UsersController()
 
 
 usersRoutes.post("/auth", controller.authenticateUser)
-// usersRoutes.post("/auth/google", controller.authenticateGoogle)
+usersRoutes.post("/auth/google", controller.authenticateGoogle)
+usersRoutes.post('/auth/refresh', controller.refreshToken)
 usersRoutes.post("/", controller.createUser)
 usersRoutes.put("/me", verifyJWT, uploadFile, controller.updateUser)
 usersRoutes.get("/:userId", verifyJWT, controller.findUser)

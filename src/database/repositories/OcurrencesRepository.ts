@@ -14,11 +14,10 @@ export default class OcurrencesRepository {
 		return this.repository.save(newOcurrences)
 	}
 
-	async listOcurrences(date?: Date): Promise<Ocurrences[]> {
-		const options = date ? { date: MoreThanOrEqual(date) } : {}
+	async listOcurrences(): Promise<Ocurrences[]> {
 
 		return this.repository.find({
-			where: options
+			relations: ['address']
 		})
 	}
 
@@ -29,11 +28,15 @@ export default class OcurrencesRepository {
 			.getRawMany()
 	}
 
-	async listOcurrencesByNeighborhood(neighborhood: string): Promise<{ ocurrences_id: string; ocurrences_type: string }[]> {
+	async getMoreOcurrences(): Promise<{ type: string; quantity: number }[]> {
 		return this.repository.createQueryBuilder('ocurrences')
-			.innerJoinAndSelect('ocurrences.address', 'address')
-			.andWhere('address.district = :neighborhood', { neighborhood })
-			.select(['ocurrences.id', 'ocurrences.type'])
+			.select('type')
+			.addSelect('COUNT(type)', 'quantity')
+			.groupBy('type')
+			.orderBy('quantity', 'DESC')
 			.getRawMany()
+
 	}
+
+
 }

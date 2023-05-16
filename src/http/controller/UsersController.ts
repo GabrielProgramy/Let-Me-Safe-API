@@ -70,16 +70,27 @@ export default class UsersController {
 	}
 
 
-	// async authenticateGoogle(req: Request, res: Response): Promise<Response> {
-	// 	try {
-	// 		const oAuthtoken = req.body.token
+	async authenticateGoogle(req: Request, res: Response): Promise<Response> {
+		try {
+			const oAuthtoken = req.body.token
 
-	// 		const token = await UsersController.usersService.authenticateGoogle(oAuthtoken)
+			const token = await UsersController.usersService.authenticateGoogle(oAuthtoken)
 
-	// 		res.status(200).json({ token })
-	// 	} catch (err) {
-	// 		console.error(err)
-	// 		return res.status(404).json({ message: err.message })
-	// 	}
-	// }
+			res.status(200).json({ token })
+		} catch (err) {
+			console.error(err)
+			return res.status(404).json({ message: err.message })
+		}
+	}
+
+	async refreshToken(req: Request, res: Response): Promise<Response> {
+		try {
+			const token = await UsersController.usersService.refreshToken(req.body.token)
+
+			res.status(200).json({ token })
+		} catch (err) {
+			console.error(err)
+			return res.status(404).json({ message: err.message })
+		}
+	}
 }

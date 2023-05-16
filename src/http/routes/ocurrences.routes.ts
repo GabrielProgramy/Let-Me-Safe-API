@@ -7,8 +7,13 @@ const controller = new OcurrencesController()
 
 ocurrenceRoute.get('/', controller.getOcurrencesMap)
 ocurrenceRoute.get('/dangerous-neighborhoods', verifyJWT, controller.getDangerousNeighborhoods)
-ocurrenceRoute.get('/ocurrences-neighborhoods', verifyJWT, controller.listOcurrencesNeighborhoods)
+ocurrenceRoute.get('/frequent', verifyJWT, controller.getMoreFrequentOccurrences)
 ocurrenceRoute.get('/all', verifyJWT, controller.getOcurrences)
 ocurrenceRoute.post('/', verifyJWT, controller.createOcurrence)
+ocurrenceRoute.get('/nearby', verifyJWT, controller.getNearbyOcurrences)
 
 export default ocurrenceRoute
+
+
+
+

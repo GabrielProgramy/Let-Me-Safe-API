@@ -1,7 +1,5 @@
-import { Column, Entity, OneToMany, OneToOne, PrimaryColumn } from 'typeorm'
+import { Column, Entity, PrimaryColumn } from 'typeorm'
 import { randomUUID } from 'node:crypto'
-import Address from './Address'
-import { Ocurrences } from './Ocurrences'
 
 @Entity('users')
 export class Users {
@@ -31,12 +29,6 @@ export class Users {
 
 	@Column({ nullable: true })
 	addressId?: string
-
-	// @OneToOne(() => Address)
-	// address?: Address
-
-	// @OneToMany(() => Ocurrences, (ocurrence) => ocurrence.user)
-	// ocurrences?: Ocurrences[]
 
 	constructor() {
 		if (!this.id) {

@@ -17,7 +17,8 @@ export const updateUserSchema = Joi.object({
 	password: Joi.string(),
 	phone: Joi.string(),
 	birthDate: Joi.date(),
-	cep: Joi.string()
+	cep: Joi.string(),
+	avatar: Joi.any(),
 })
 
 export const authUserSchema = Joi.object({
