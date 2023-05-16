@@ -17,27 +17,25 @@ import { randomBytes } from 'node:crypto'
 
 
 export default class UsersService {
-	private usersRepository: UsersRepository;
-	private addressService: AddressService;
+	private usersRepository: UsersRepository
+	private addressService: AddressService
 
 	constructor() {
-		this.usersRepository = new UsersRepository();
-		this.addressService = new AddressService();
+		this.usersRepository = new UsersRepository()
+		this.addressService = new AddressService()
 	}
 
-	private generateToken(user: {
-		id: string, email?: string, firstName: string, lastName: string, avatar?: string
-	}) {
+	private generateToken(user: { id: string, email?: string, firstName: string, lastName: string, avatar?: string }, reset?: boolean): string {
 		return sign({
 			sub: user.id,
 			iss: process.env.JWT_ISSUER,
-			aud: process.env.JWT_AUDIENCE,
-			email: user.email,
+			aud: reset ? process.env.JWT_AUDIENCE_RESET : process.env.JWT_AUDIENCE,
+			email: user.email && user.email,
 			name: `${user.firstName} ${user.lastName}`,
-			avatar: user.avatar,
+			avatar: user.avatar && user.avatar,
 		}, process.env.JWT_SECRET as Secret, {
 			algorithm: process.env.JWT_ALGORITHM as Algorithm,
-			expiresIn: process.env.JWT_EXPIRATION
+			expiresIn: reset ? process.env.JWT_EXPIRATION_RESET : process.env.JWT_EXPIRATION
 		})
 	}
 
@@ -47,18 +45,18 @@ export default class UsersService {
 		})
 		const years = Number(moment(user.birthDate, moment.HTML5_FMT.DATETIME_LOCAL).fromNow().match(/\d/g).join(''))
 
-		if (alreadyExistsUser) throw new Error('User already exists!');
-		if (years < 18) throw new Error('User dont permission!');
+		if (alreadyExistsUser) throw new Error('User already exists!')
+		if (years < 18) throw new Error('User dont permission!')
 
-		return this.usersRepository.insertUsers(user);
+		return this.usersRepository.insertUsers(user)
 	}
 
 	async findUser(options: Object): Promise<Users> {
 		const user = await this.usersRepository.findUser(options)
 
-		if (!user) throw new Error('User not found!');
+		if (!user) throw new Error('User not found!')
 
-		return user;
+		return user
 	}
 
 	async updateUser(user: Users, address?: string, avatar?: Express.Multer.File): Promise<Users> {
@@ -69,18 +67,18 @@ export default class UsersService {
 		if (!birthDate.isSame(moment(user.birthDate))) birthDate = moment(user.birthDate.setDate(user.birthDate.getDate() + 1))
 
 		if (avatar) {
-			const avatarRef = ref(storage, `${avatar.filename}`);
-			await uploadBytes(avatarRef, fs.readFileSync(avatar.path));
-			const avatarPath = await getDownloadURL(avatarRef);
+			const avatarRef = ref(storage, `${avatar.filename}`)
+			await uploadBytes(avatarRef, fs.readFileSync(avatar.path))
+			const avatarPath = await getDownloadURL(avatarRef)
 
-			if (avatarPath) fs.unlinkSync(avatar.path);
+			if (avatarPath) fs.unlinkSync(avatar.path)
 
-			user.avatar = avatarPath;
+			user.avatar = avatarPath
 		}
 
 		if (address) {
-			const existsAddress = await this.addressService.findByCep(address);
-			let addressId: string;
+			const existsAddress = await this.addressService.findByCep(address)
+			let addressId: string
 
 			if (!existsAddress) {
 				const getAddress = await VCAPI_CEP(address)
@@ -90,7 +88,7 @@ export default class UsersService {
 					...getAddress
 				})
 
-				addressId = newAddress.id;
+				addressId = newAddress.id
 			}
 
 			user.addressId = addressId ?? existsAddress.id
@@ -104,10 +102,10 @@ export default class UsersService {
 
 
 	async authenticateUser(email: string, password: string): Promise<string> {
-		const user = await this.findUser({ email });
+		const user = await this.findUser({ email })
 
 		if (user.password !== password)
-			throw new Error('Email or Password invalid!');
+			throw new Error('Email or Password invalid!')
 
 		const token = this.generateToken({
 			id: user.id,
@@ -117,7 +115,7 @@ export default class UsersService {
 			lastName: user.lastName
 		})
 
-		return token;
+		return token
 	}
 
 	async authenticateGoogle(oAuthtoken: string): Promise<string> {
@@ -126,9 +124,9 @@ export default class UsersService {
 			{
 				headers: { Authorization: `Bearer ${oAuthtoken}` },
 			}
-		);
+		)
 
-		const data = await retur.json();
+		const data = await retur.json()
 
 		let user = await this.usersRepository.findUser({ email: data.email })
 
@@ -172,29 +170,27 @@ export default class UsersService {
 	}
 
 	async sendEmail(email: string): Promise<void> {
-		const user = await this.usersRepository.findUser({ email });
+		const user = await this.usersRepository.findUser({ email })
 
-		if (!user) return;
+		if (!user) return
 
 		const template = fs.readFileSync(
 			path.resolve('src/utils/templates/template.mustache'),
 			'utf-8',
-		);
+		)
 
 		const resetToken = this.generateToken({
 			id: user.id,
 			firstName: user.firstName,
 			lastName: user.lastName,
-		});
+		}, true)
 
-		const resetLink = `https://example.com/reset-password?email=ok&token=${resetToken}`;
+		const resetLink = `https://example.com/reset-password?token=${resetToken}`
 
-		const data = {
+		const html = Mustache.render(template, {
 			name: user.firstName,
 			resetLink: resetLink,
-		};
-
-		const html = Mustache.render(template, data);
+		})
 
 		const transporter = nodemailer.createTransport({
 			host: 'smtp.ethereal.email',
@@ -204,29 +200,26 @@ export default class UsersService {
 				user: 'trever.bailey39@ethereal.email',
 				pass: 'FK8sETDnX1hfswgqn5',
 			},
-		});
+		})
 
 		const mailOptions = {
 			from: email,
 			to: 'trever.bailey39@ethereal.email',
 			subject: 'Reset de senha Let Me Safe',
 			html: html,
-		};
+		}
 
 		transporter.sendMail(mailOptions, (error, info) => {
-			if (error) {
-				console.error(error);
-			} else {
-				console.log('E-mail enviado com sucesso!', info.accepted);
-			}
-		});
+			if (error) console.error(error)
+			else console.log('E-mail enviado com sucesso!', info.accepted)
+		})
 	}
 
 	async resetPassword(password, userId): Promise<Users> {
-		const user = await this.findUser({ id: userId });
+		const user = await this.findUser({ id: userId })
 
-		user.password = password;
+		user.password = password
 
-		return await this.updateUser(user);
+		return await this.updateUser(user)
 	}
 }
