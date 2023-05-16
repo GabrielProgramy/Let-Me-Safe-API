@@ -1,11 +1,14 @@
 import fs from 'node:fs'
-import fetch from 'node-fetch'
 import moment from 'moment'
+import path from 'node:path'
+import fetch from 'node-fetch'
+import Mustache from 'mustache'
+import nodemailer from 'nodemailer'
 import { Algorithm, Secret, sign, verify } from 'jsonwebtoken'
 import { ref, getDownloadURL, uploadBytes } from 'firebase/storage'
 
-import { Users } from '../database/entities/User'
 import UsersRepository from '../database/repositories/UsersRepository'
+import { Users } from '../database/entities/User'
 import AddressService from './AddressService'
 import { VCAPI_CEP } from '../utils/viaCepAPI'
 import { storage } from '../utils/firebase'
@@ -14,16 +17,16 @@ import { randomBytes } from 'node:crypto'
 
 
 export default class UsersService {
-	private usersRepository: UsersRepository
-	private addressService: AddressService
+	private usersRepository: UsersRepository;
+	private addressService: AddressService;
 
 	constructor() {
-		this.usersRepository = new UsersRepository()
-		this.addressService = new AddressService()
+		this.usersRepository = new UsersRepository();
+		this.addressService = new AddressService();
 	}
 
 	private generateToken(user: {
-		id: string, email: string, firstName: string, lastName: string, avatar: string
+		id: string, email?: string, firstName: string, lastName: string, avatar?: string
 	}) {
 		return sign({
 			sub: user.id,
@@ -44,21 +47,21 @@ export default class UsersService {
 		})
 		const years = Number(moment(user.birthDate, moment.HTML5_FMT.DATETIME_LOCAL).fromNow().match(/\d/g).join(''))
 
-		if (alreadyExistsUser) throw new Error('User already exists!')
-		if (years < 18) throw new Error('User dont permission!')
+		if (alreadyExistsUser) throw new Error('User already exists!');
+		if (years < 18) throw new Error('User dont permission!');
 
-		return this.usersRepository.insertUsers(user)
+		return this.usersRepository.insertUsers(user);
 	}
 
 	async findUser(options: Object): Promise<Users> {
 		const user = await this.usersRepository.findUser(options)
 
-		if (!user) throw new Error('User not found!')
+		if (!user) throw new Error('User not found!');
 
-		return user
+		return user;
 	}
 
-	async updateUser(user: Users, address: string, avatar: Express.Multer.File): Promise<Users> {
+	async updateUser(user: Users, address?: string, avatar?: Express.Multer.File): Promise<Users> {
 		const existingUser = await this.findUser({ id: user.id })
 
 		let birthDate = moment(existingUser.birthDate)
@@ -66,19 +69,18 @@ export default class UsersService {
 		if (!birthDate.isSame(moment(user.birthDate))) birthDate = moment(user.birthDate.setDate(user.birthDate.getDate() + 1))
 
 		if (avatar) {
-			const avatarRef = ref(storage, `${avatar.filename}`)
-			await uploadBytes(avatarRef, fs.readFileSync(avatar.path))
-			const avatarPath = await getDownloadURL(avatarRef)
+			const avatarRef = ref(storage, `${avatar.filename}`);
+			await uploadBytes(avatarRef, fs.readFileSync(avatar.path));
+			const avatarPath = await getDownloadURL(avatarRef);
 
-			if (avatarPath) fs.unlinkSync(avatar.path)
+			if (avatarPath) fs.unlinkSync(avatar.path);
 
-			user.avatar = avatarPath
+			user.avatar = avatarPath;
 		}
 
-
 		if (address) {
-			const existsAddress = await this.addressService.findByCep(address)
-			let addressId: string
+			const existsAddress = await this.addressService.findByCep(address);
+			let addressId: string;
 
 			if (!existsAddress) {
 				const getAddress = await VCAPI_CEP(address)
@@ -88,7 +90,7 @@ export default class UsersService {
 					...getAddress
 				})
 
-				addressId = newAddress.id
+				addressId = newAddress.id;
 			}
 
 			user.addressId = addressId ?? existsAddress.id
@@ -98,16 +100,14 @@ export default class UsersService {
 			birthDate: birthDate.format('YYYY-MM-DD'),
 			...user,
 		})
-
-		return user
-
 	}
 
 
 	async authenticateUser(email: string, password: string): Promise<string> {
-		const user = await this.findUser({ email })
+		const user = await this.findUser({ email });
 
-		if (user.password !== password) throw new Error('Email or Password invalid!')
+		if (user.password !== password)
+			throw new Error('Email or Password invalid!');
 
 		const token = this.generateToken({
 			id: user.id,
@@ -117,7 +117,7 @@ export default class UsersService {
 			lastName: user.lastName
 		})
 
-		return token
+		return token;
 	}
 
 	async authenticateGoogle(oAuthtoken: string): Promise<string> {
@@ -169,5 +169,64 @@ export default class UsersService {
 		})
 
 		return newToken
+	}
+
+	async sendEmail(email: string): Promise<void> {
+		const user = await this.usersRepository.findUser({ email });
+
+		if (!user) return;
+
+		const template = fs.readFileSync(
+			path.resolve('src/utils/templates/template.mustache'),
+			'utf-8',
+		);
+
+		const resetToken = this.generateToken({
+			id: user.id,
+			firstName: user.firstName,
+			lastName: user.lastName,
+		});
+
+		const resetLink = `https://example.com/reset-password?email=ok&token=${resetToken}`;
+
+		const data = {
+			name: user.firstName,
+			resetLink: resetLink,
+		};
+
+		const html = Mustache.render(template, data);
+
+		const transporter = nodemailer.createTransport({
+			host: 'smtp.ethereal.email',
+			port: 587,
+			secure: false,
+			auth: {
+				user: 'trever.bailey39@ethereal.email',
+				pass: 'FK8sETDnX1hfswgqn5',
+			},
+		});
+
+		const mailOptions = {
+			from: email,
+			to: 'trever.bailey39@ethereal.email',
+			subject: 'Reset de senha Let Me Safe',
+			html: html,
+		};
+
+		transporter.sendMail(mailOptions, (error, info) => {
+			if (error) {
+				console.error(error);
+			} else {
+				console.log('E-mail enviado com sucesso!', info.accepted);
+			}
+		});
+	}
+
+	async resetPassword(password, userId): Promise<Users> {
+		const user = await this.findUser({ id: userId });
+
+		user.password = password;
+
+		return await this.updateUser(user);
 	}
 }
