@@ -4,12 +4,12 @@ export class addAddressInOcurrences1679677199243 implements MigrationInterface {
 
 	public async up(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.addColumn('ocurrences', new TableColumn({
-			name: 'address_id',
+			name: 'addressId',
 			type: 'uuid'
 		}))
 		await queryRunner.createForeignKey('ocurrences', new TableForeignKey({
 			name: 'AddressOcurrences',
-			columnNames: ['address_id'],
+			columnNames: ['addressId'],
 			referencedColumnNames: ['id'],
 			referencedTableName: 'address'
 		}))
@@ -17,7 +17,7 @@ export class addAddressInOcurrences1679677199243 implements MigrationInterface {
 
 	public async down(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.dropForeignKey('ocurrences', 'AddressOcurrences')
-		await queryRunner.dropColumn('ocurrences', 'address_id')
+		await queryRunner.dropColumn('ocurrences', 'addressId')
 	}
 
 }

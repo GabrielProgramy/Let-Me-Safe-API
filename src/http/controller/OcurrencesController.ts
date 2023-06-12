@@ -98,6 +98,20 @@ export default class OcurrencesController {
 			console.log(err)
 			return res.status(400).json({ err: err.message })
 		}
+	}
+
+	async getSafeRoute(req: RequestAlter, res: Response): Promise<Response> {
+		try {
+			const origin = req.body.origin
+			const destination = req.body.destination
+
+			const ocurrences = await OcurrencesController.ocurrencesService.secureRoute(origin, destination)
+
+			return res.status(200).json(ocurrences)
+		} catch (err) {
+			console.log(err)
+			return res.status(400).json({ err: err.message })
+		}
 
 	}
 

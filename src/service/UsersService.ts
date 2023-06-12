@@ -4,13 +4,11 @@ import path from 'node:path'
 import fetch from 'node-fetch'
 import Mustache from 'mustache'
 import nodemailer from 'nodemailer'
-import { Algorithm, Secret, sign, verify } from 'jsonwebtoken'
+import { Algorithm, Secret, sign } from 'jsonwebtoken'
 import { ref, getDownloadURL, uploadBytes } from 'firebase/storage'
 
 import UsersRepository from '../database/repositories/UsersRepository'
 import { Users } from '../database/entities/User'
-import AddressService from './AddressService'
-import { VCAPI_CEP } from '../utils/viaCepAPI'
 import { storage } from '../utils/firebase'
 import { randomBytes } from 'node:crypto'
 
@@ -18,11 +16,9 @@ import { randomBytes } from 'node:crypto'
 
 export default class UsersService {
 	private usersRepository: UsersRepository
-	private addressService: AddressService
 
 	constructor() {
 		this.usersRepository = new UsersRepository()
-		this.addressService = new AddressService()
 	}
 
 	private generateToken(user: { id: string, email?: string, firstName: string, lastName: string, avatar?: string }, reset?: boolean): string {
@@ -59,7 +55,7 @@ export default class UsersService {
 		return user
 	}
 
-	async updateUser(user: Users, address?: string, avatar?: Express.Multer.File): Promise<Users> {
+	async updateUser(user: Users, avatar?: Express.Multer.File): Promise<Users> {
 		const existingUser = await this.findUser({ id: user.id })
 
 		let birthDate = moment(existingUser.birthDate)
@@ -76,23 +72,7 @@ export default class UsersService {
 			user.avatar = avatarPath
 		}
 
-		if (address) {
-			const existsAddress = await this.addressService.findByCep(address)
-			let addressId: string
 
-			if (!existsAddress) {
-				const getAddress = await VCAPI_CEP(address)
-
-				const newAddress = await this.addressService.create({
-					cep: getAddress.cep.split('-').join(''),
-					...getAddress
-				})
-
-				addressId = newAddress.id
-			}
-
-			user.addressId = addressId ?? existsAddress.id
-		}
 
 		return this.usersRepository.updateUser({
 			birthDate: birthDate.format('YYYY-MM-DD'),
@@ -119,6 +99,7 @@ export default class UsersService {
 	}
 
 	async authenticateGoogle(oAuthtoken: string): Promise<string> {
+		// https://www.googleapis.com/plus/v1/people/me
 		const retur = await fetch(
 			"https://www.googleapis.com/userinfo/v2/me",
 			{

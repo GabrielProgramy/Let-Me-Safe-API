@@ -26,7 +26,7 @@ export default class Address {
 	state: string
 
 	@OneToMany(() => Ocurrences, ocurrences => ocurrences.address)
-	@JoinColumn({ referencedColumnName: 'address_id' })
+	@JoinColumn({ referencedColumnName: 'addressId' })
 	ocurrences?: Ocurrences[]
 
 	constructor() {

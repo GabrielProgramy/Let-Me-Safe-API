@@ -1,8 +1,8 @@
+import Joi from 'joi';
 import { Request, Response } from 'express'
 import UsersService from '../../service/UsersService'
 import { RequestAlter } from '../middleware/verifyJWT'
 import { authUserSchema, createUserSchema, updateUserSchema } from './validations/usersValidations'
-import Joi from 'joi';
 
 export default class UsersController {
 	private static usersService: UsersService;
@@ -49,15 +49,13 @@ export default class UsersController {
 
 			const updateUser = await UsersController.usersService.updateUser(
 				{ ...user, id: userId },
-				cep,
-				avatar,
+				avatar
 			);
 
 			return res.status(200).json(updateUser);
 		} catch (error) {
 			console.log(error);
-			if (error instanceof Joi.ValidationError)
-				return res.status(422).json({ message: error.message });
+			if (error instanceof Joi.ValidationError) return res.status(422).json({ message: error.message });
 			return res.status(404).json({ message: error.message });
 		}
 	}

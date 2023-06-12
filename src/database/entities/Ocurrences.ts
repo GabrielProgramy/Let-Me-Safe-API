@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm'
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm'
 import { randomUUID } from 'node:crypto'
 import { Users } from './User'
 import Address from './Address'
@@ -32,6 +32,12 @@ export class Ocurrences {
 	@ManyToOne(() => Address, address => address.ocurrences)
 	@JoinColumn({ referencedColumnName: 'id' })
 	address?: Address
+
+	@ManyToOne(() => Address, address => address.ocurrences)
+	@JoinColumn({ referencedColumnName: 'id' })
+	user?: Users
+
+
 
 	constructor() {
 		if (!this.id) {

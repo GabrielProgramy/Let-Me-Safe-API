@@ -1,5 +1,7 @@
-import { Column, Entity, PrimaryColumn } from 'typeorm'
+import { Column, Entity, JoinColumn, OneToMany, PrimaryColumn } from 'typeorm'
 import { randomUUID } from 'node:crypto'
+import { Ocurrences } from './Ocurrences'
+import Contacts from './Contacts'
 
 @Entity('users')
 export class Users {
@@ -27,8 +29,13 @@ export class Users {
 	@Column({ nullable: true })
 	birthDate?: Date
 
-	@Column({ nullable: true })
-	addressId?: string
+	@OneToMany(() => Ocurrences, ocurrences => ocurrences.user)
+	@JoinColumn({ referencedColumnName: 'userId' })
+	ocurrences?: Ocurrences[]
+
+	@OneToMany(() => Contacts, contacts => contacts.user)
+	@JoinColumn({ referencedColumnName: 'userId' })
+	contacts?: Contacts[]
 
 	constructor() {
 		if (!this.id) {

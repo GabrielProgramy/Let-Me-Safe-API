@@ -11,6 +11,7 @@ ocurrenceRoute.get('/frequent', verifyJWT, controller.getMoreFrequentOccurrences
 ocurrenceRoute.get('/all', verifyJWT, controller.getOcurrences)
 ocurrenceRoute.post('/', verifyJWT, controller.createOcurrence)
 ocurrenceRoute.get('/nearby', verifyJWT, controller.getNearbyOcurrences)
+ocurrenceRoute.get('/safe-route', verifyJWT, controller.getSafeRoute)
 
 export default ocurrenceRoute
 
