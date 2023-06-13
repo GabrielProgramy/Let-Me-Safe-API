@@ -39,16 +39,17 @@ export default class UsersService {
 		const alreadyExistsUser = await this.usersRepository.findUser({
 			email: user.email
 		})
-		const years = Number(moment(user.birthDate, moment.HTML5_FMT.DATETIME_LOCAL).fromNow().match(/\d/g).join(''))
+		// const years = Number(moment(user.birthDate, moment.HTML5_FMT.DATETIME_LOCAL).fromNow().match(/\d/g).join(''))
 
 		if (alreadyExistsUser) throw new Error('User already exists!')
-		if (years < 18) throw new Error('User dont permission!')
+		// if (years < 18) throw new Error('User dont permission!')
 
 		return this.usersRepository.insertUsers(user)
 	}
 
 	async findUser(options: Object): Promise<Users> {
 		const user = await this.usersRepository.findUser(options)
+		console.log(user)
 
 		if (!user) throw new Error('User not found!')
 
@@ -166,7 +167,7 @@ export default class UsersService {
 			lastName: user.lastName,
 		}, true)
 
-		const resetLink = `https://example.com/reset-password?token=${resetToken}`
+		const resetLink = `https://192.168.0.120:3000/redirect?url=exp://192.168.0.120:19000/--/letmesafe/reset?token=${resetToken}`
 
 		const html = Mustache.render(template, {
 			name: user.firstName,
@@ -174,18 +175,16 @@ export default class UsersService {
 		})
 
 		const transporter = nodemailer.createTransport({
-			host: 'smtp.ethereal.email',
-			port: 587,
-			secure: false,
+			service: 'gmail',
 			auth: {
-				user: 'trever.bailey39@ethereal.email',
-				pass: 'FK8sETDnX1hfswgqn5',
-			},
+				user: 'contato.letmesafe@gmail.com',
+				pass: 'vojctzzfdzhbyfab',
+			}
 		})
 
 		const mailOptions = {
-			from: email,
-			to: 'trever.bailey39@ethereal.email',
+			from: 'contato.letmesafe@gmail.com',
+			to: email,
 			subject: 'Reset de senha Let Me Safe',
 			html: html,
 		}
