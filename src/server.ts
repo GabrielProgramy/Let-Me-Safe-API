@@ -17,7 +17,7 @@ postgresConnection.initialize().then(() => {
 	app.use('/ocurrences', ocurrenceRoute)
 
 	app.get('/redirect', (req: Request, res) => {
-		const url = req.params.url
+		const url = req.query.url as string
 
 		res.redirect(url)
 	})

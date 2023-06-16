@@ -156,6 +156,7 @@ export default class OcurrencesService {
 		const route = await fetch(path)
 		const routeJson = await route.json()
 		const routesCoordinates: Array<[number, number]> = routeJson.routes[0].geometry.coordinates
+		const duration = Math.round(routeJson.routes[0].duration * 1000)
 
 		const rangeRadius = occurrences.map(({ location }) => {
 			for (const route of routesCoordinates) {
@@ -173,22 +174,34 @@ export default class OcurrencesService {
 
 		}).filter(occurrence => occurrence !== undefined)
 
+
+		const coordinates = routesCoordinates.map(coordinate => {
+			return {
+				latitude: coordinate[1],
+				longitude: coordinate[0]
+			}
+		})
+
 		if (rangeRadius.length === 0) return {
 			severity: 'safe',
-			coordinates: routesCoordinates
+			duration,
+			coordinates
 		}
 
 		if (JSON.stringify(routesCoordinates) === JSON.stringify(definedRoute)) {
 			return {
 				severity: 'dangerous',
-				coordinates: routesCoordinates
+				duration,
+				occurrences: rangeRadius.length,
+				coordinates
 			}
 		}
 
 		if (definedRoute && JSON.stringify(routesCoordinates) !== JSON.stringify(definedRoute) && rangeRadius.length > 0) {
 			return {
 				severity: 'dangerous',
-				coordinates: routesCoordinates
+				duration,
+				coordinates
 			}
 		}
 

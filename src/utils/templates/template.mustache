@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!DOCTYPE html>
 <html>
 
 <head>
@@ -16,14 +15,12 @@
 
 		.container {
 			background-color: #ffffff;
-			max-width: 69.438rem;
-			display: flex;
-			flex-direction: column;
-			justify-content: center;
+			max-width: 800px;
 			align-items: center;
 			text-align: center;
 			margin: 0 auto;
 			padding-top: 6.25rem;
+			padding-bottom: 10px;
 		}
 
 		img {
@@ -43,20 +40,19 @@
 			font-weight: 400;
 			font-size: 1.5rem;
 			line-height: 1.813rem;
-			width: 46.188rem;
+			width: 100%;
 		}
 
 		a {
-			color: #ffffff !important;
-			display: flex;
-			align-items: center;
-			justify-content: center;
+			padding: 20px 80px;
 			text-decoration: none;
-			width: 20.938rem;
-			height: 3.75rem;
+			border-radius: 10px;
+			color: #ffffff !important;
 			background-color: #247636;
-			border-radius: 3.75rem;
-			margin: 2.125rem 0;
+		}
+
+		a:hover {
+			background-color: #3ed35e;
 		}
 
 		strong {
@@ -78,7 +74,9 @@
 			<p>Olá <strong>{{name}}</strong>, você está recebendo este e-mail porque solicitou a recuperação de senha da sua
 				conta em nosso site. Por favor, clique no link abaixo para redefinir sua senha:</p>
 		</div>
-		<div><a href="{{resetLink}}">Clique aqui</a></div>
+
+		<a href="{{resetLink}}">Clique aqui</a>
+
 		<div>
 			<p>Se você não solicitou a recuperação de senha, por favor ignore este e-mail.</p>
 			<p>Obrigado!</p>

@@ -22,7 +22,7 @@ export default class UsersController {
 			console.error(error.message);
 			if (error instanceof Joi.ValidationError)
 				return res.status(422).json({ message: error.message });
-			return res.status(400).json({ message: error.message });
+			return res.status(409).json({ message: error.message });
 		}
 	}
 

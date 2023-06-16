@@ -102,8 +102,8 @@ export default class OcurrencesController {
 
 	async getSafeRoute(req: RequestAlter, res: Response): Promise<Response> {
 		try {
-			const origin = req.body.origin
-			const destination = req.body.destination
+			const origin = req.query.origin as any
+			const destination = req.query.destination as any
 
 			const ocurrences = await OcurrencesController.ocurrencesService.secureRoute(origin, destination)
 

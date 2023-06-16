@@ -167,7 +167,7 @@ export default class UsersService {
 			lastName: user.lastName,
 		}, true)
 
-		const resetLink = `https://192.168.0.120:3000/redirect?url=exp://192.168.0.120:19000/--/letmesafe/reset?token=${resetToken}`
+		const resetLink = `http://192.168.0.120:3000/redirect?url=exp://192.168.0.120:19000/--/letmesafe/reset?token=${resetToken}`
 
 		const html = Mustache.render(template, {
 			name: user.firstName,
