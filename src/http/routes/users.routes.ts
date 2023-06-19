@@ -13,6 +13,6 @@ usersRoutes.post('/auth/refresh', controller.refreshToken)
 usersRoutes.post('/', controller.createUser)
 usersRoutes.put('/me', verifyJWT, uploadFile, controller.updateUser)
 usersRoutes.post('/forgot', controller.sendResetToken)
-usersRoutes.post('/reset-password', verifyJWT, controller.resetPassword)
+usersRoutes.patch('/reset-password', verifyJWT, controller.resetPassword)
 
 export default usersRoutes
